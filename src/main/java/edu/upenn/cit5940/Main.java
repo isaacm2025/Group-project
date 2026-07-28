@@ -7,8 +7,30 @@ import edu.upenn.cit5940.common.dto.Article;
 import edu.upenn.cit5940.datamanagement.ArticleReader;
 import edu.upenn.cit5940.datamanagement.CsvArticleReader;
 import edu.upenn.cit5940.logging.AppLogger;
+import edu.upenn.cit5940.datamanagement.JsonArticleReader;
 
 public class Main {
+
+    private static ArticleReader createReader(
+        Path dataPath,
+        AppLogger logger) {
+
+        String fileName = dataPath
+                .getFileName()
+                .toString()
+                .toLowerCase();
+
+        if (fileName.endsWith(".csv")) {
+            return new CsvArticleReader(logger);
+        }
+
+        if (fileName.endsWith(".json")) {
+            return new JsonArticleReader(logger);
+        }
+
+        throw new IllegalArgumentException(
+                "Unsupported data-file format: " + fileName);
+    }
 
     private static final String DEFAULT_DATA_FILE =
             "data/articles.csv";
@@ -55,8 +77,7 @@ public class Main {
              * CSV is the only implemented reader at this stage.
              * Later, select CSV or JSON based on the extension.
              */
-            ArticleReader reader =
-                    new CsvArticleReader(logger);
+            ArticleReader reader = createReader(dataPath, logger);
 
             List<Article> articles =
                     reader.read(dataPath);
