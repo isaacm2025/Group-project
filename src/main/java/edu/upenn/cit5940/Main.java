@@ -6,6 +6,7 @@ import java.util.Set;
 
 import edu.upenn.cit5940.common.dto.Article;
 import edu.upenn.cit5940.datamanagement.ArticleReader;
+import edu.upenn.cit5940.datamanagement.ArticleRepository;
 import edu.upenn.cit5940.datamanagement.CsvArticleReader;
 import edu.upenn.cit5940.datamanagement.JsonArticleReader;
 import edu.upenn.cit5940.datamanagement.TextNormalizer;
@@ -100,6 +101,29 @@ public class Main {
                     "Loaded "
                             + stopWords.size()
                             + " stop words");
+
+            ArticleRepository repository =
+                    new ArticleRepository(
+                            articles,
+                            stopWords);
+
+            logger.info(
+                    "Built repository with "
+                            + repository.getArticleCount()
+                            + " articles and "
+                            + repository.getIndexedWordCount()
+                            + " indexed words");
+
+            List<Article> searchResults =
+                    repository.search(
+                            List.of(
+                                    "artificial",
+                                    "intelligence"));
+
+            logger.info(
+                    "Test search returned "
+                            + searchResults.size()
+                            + " articles");
 
             logger.info(
                     "Loaded "
