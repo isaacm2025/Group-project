@@ -2,12 +2,14 @@ package edu.upenn.cit5940;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 
 import edu.upenn.cit5940.common.dto.Article;
 import edu.upenn.cit5940.datamanagement.ArticleReader;
 import edu.upenn.cit5940.datamanagement.CsvArticleReader;
-import edu.upenn.cit5940.logging.AppLogger;
 import edu.upenn.cit5940.datamanagement.JsonArticleReader;
+import edu.upenn.cit5940.datamanagement.TextNormalizer;
+import edu.upenn.cit5940.logging.AppLogger;
 
 public class Main {
 
@@ -89,6 +91,15 @@ public class Main {
                 throw new IllegalStateException(
                         "The data file contains zero valid articles.");
             }
+
+            Set<String> stopWords =
+                    TextNormalizer.loadStopWords(
+                            Path.of("data/stop_words.txt"));
+
+            logger.info(
+                    "Loaded "
+                            + stopWords.size()
+                            + " stop words");
 
             logger.info(
                     "Loaded "
