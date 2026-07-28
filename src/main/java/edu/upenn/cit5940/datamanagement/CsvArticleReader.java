@@ -19,10 +19,22 @@ import com.opencsv.RFC4180ParserBuilder;
 import com.opencsv.exceptions.CsvValidationException;
 
 import edu.upenn.cit5940.common.dto.Article;
+import edu.upenn.cit5940.logging.AppLogger;
 
 public class CsvArticleReader implements ArticleReader {
 
     private static final int MULTILINE_LIMIT = 1000;
+
+    private final AppLogger logger;
+
+    public CsvArticleReader(AppLogger logger) {
+        if (logger == null) {
+            throw new IllegalArgumentException(
+                    "Logger cannot be null.");
+        }
+
+        this.logger = logger;
+    }
 
     @Override
     public List<Article> read(Path filePath) throws IOException {
@@ -83,12 +95,13 @@ public class CsvArticleReader implements ArticleReader {
                  * Skip it and continue reading the remaining records.
                  */
                 if (row.length != header.length) {
-                    System.out.printf(
-                            "Skipping malformed record %d: "
-                                    + "expected %d fields but found %d.%n",
-                            recordNumber,
-                            header.length,
-                            row.length);
+                    logger.warning(
+                        "Skipping malformed CSV record "
+                                + recordNumber
+                                + ": expected "
+                                + header.length
+                                + " fields but found "
+                                + row.length);
                     continue;
                 }
 
@@ -99,10 +112,11 @@ public class CsvArticleReader implements ArticleReader {
                     articles.add(article);
 
                 } catch (IllegalArgumentException exception) {
-                    System.out.printf(
-                            "Skipping malformed record %d: %s%n",
-                            recordNumber,
-                            exception.getMessage());
+                    logger.warning(
+                        "Skipping malformed CSV record "
+                                + recordNumber
+                                + ": "
+                                + exception.getMessage());
                 }
             }
 
