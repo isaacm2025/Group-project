@@ -73,4 +73,18 @@ public class NewsSearchService {
                 .map(Article::getTitle)
                 .toList();
     }
+
+    public List<String> autocomplete(String prefix) {
+
+        if (prefix == null || prefix.isBlank()) {
+            return List.of();
+        }
+
+        logger.info(
+                "Autocomplete query: " + prefix);
+
+        return repository.autocomplete(
+                prefix,
+                10);
+    }
 }

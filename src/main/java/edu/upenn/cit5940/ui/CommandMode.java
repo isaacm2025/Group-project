@@ -106,6 +106,10 @@ public class CommandMode {
                 executeArticlesByDate(parts);
                 return false;
 
+            case "autocomplete":
+                executeAutocomplete(parts);
+                return false;
+
             default:
                 System.out.println(
                         "Unknown command. Type 'help' "
@@ -221,6 +225,9 @@ public class CommandMode {
         System.out.println(
                 "articles <start_date> <end_date> "
                         + "- Browse articles by date");
+        System.out.println(
+                "autocomplete <prefix> "
+                        + "- Get title-word suggestions");
     }
 
 
@@ -281,5 +288,30 @@ public class CommandMode {
 
         System.out.println(
                 titles.size() + " article(s) found.");
+    }
+    private void executeAutocomplete(
+            String[] parts) {
+
+        if (parts.length != 2) {
+            System.out.println(
+                    "Usage: autocomplete <prefix>");
+            return;
+        }
+
+        List<String> suggestions =
+                service.autocomplete(parts[1]);
+
+        if (suggestions.isEmpty()) {
+            System.out.println(
+                    "No autocomplete suggestions found.");
+            return;
+        }
+
+        System.out.println(
+                "Autocomplete suggestions:");
+
+        for (String suggestion : suggestions) {
+            System.out.println(suggestion);
+        }
     }
 }

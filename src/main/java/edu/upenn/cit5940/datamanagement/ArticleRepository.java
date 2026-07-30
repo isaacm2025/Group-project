@@ -18,6 +18,7 @@ public class ArticleRepository {
     private final Map<String, Set<String>> invertedIndex;
     private final Set<String> stopWords;
     private final TreeMap<LocalDate, List<String>> articlesByDate;
+    private final TitleTrie titleTrie;
 
     public ArticleRepository(
             List<Article> articles,
@@ -35,6 +36,7 @@ public class ArticleRepository {
                         ? Set.of()
                         : new HashSet<>(stopWords);
         this.articlesByDate = new TreeMap<>();
+        this.titleTrie = new TitleTrie();
 
         buildIndexes(articles);
     }
@@ -49,11 +51,22 @@ public class ArticleRepository {
             articlesById.put(
                     article.getId(),
                     article);
+
+            indexTitleWords(article);
             
             articlesByDate.computeIfAbsent(article.getDate(), ignored -> new ArrayList<>()).add(article.getId());
 
             indexArticle(article);
         }
+    }
+
+    public List<String> autocomplete(
+            String prefix,
+            int maximumSuggestions) {
+
+        return titleTrie.autocomplete(
+                prefix,
+                maximumSuggestions);
     }
 
     private void indexArticle(Article article) {
@@ -213,6 +226,23 @@ public class ArticleRepository {
         }
 
         return results;
+    }
+
+    private void indexTitleWords(Article article) {
+
+        /*
+        * Use an empty stop-word set because autocomplete
+        * is based on words appearing in titles, not only
+        * words included in the inverted search index.
+        */
+        List<String> titleWords =
+                TextNormalizer.tokenize(
+                        article.getTitle(),
+                        Set.of());
+
+        for (String word : titleWords) {
+            titleTrie.insert(word);
+        }
     }
 
 }
