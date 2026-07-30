@@ -11,6 +11,8 @@ import edu.upenn.cit5940.datamanagement.CsvArticleReader;
 import edu.upenn.cit5940.datamanagement.JsonArticleReader;
 import edu.upenn.cit5940.datamanagement.TextNormalizer;
 import edu.upenn.cit5940.logging.AppLogger;
+import edu.upenn.cit5940.processor.NewsSearchService;
+import edu.upenn.cit5940.ui.ConsoleUI;
 
 public class Main {
 
@@ -114,16 +116,8 @@ public class Main {
                             + repository.getIndexedWordCount()
                             + " indexed words");
 
-            List<Article> searchResults =
-                    repository.search(
-                            List.of(
-                                    "artificial",
-                                    "intelligence"));
+            NewsSearchService service = new NewsSearchService(repository, logger);
 
-            logger.info(
-                    "Test search returned "
-                            + searchResults.size()
-                            + " articles");
 
             logger.info(
                     "Loaded "
@@ -138,6 +132,9 @@ public class Main {
             
             logger.info(
                 "Architecture initialization complete");
+
+            ConsoleUI ui = new ConsoleUI(service, logger);
+            ui.start();
 
             /*
              * Later, construct these components here:

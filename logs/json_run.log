@@ -1,0 +1,9 @@
+[2026-07-27 19:12:11] INFO    Application starting
+[2026-07-27 19:12:11] INFO    Loading articles from: data/articles.json
+[2026-07-27 19:12:11] WARNING Skipping malformed JSON record 4735: Article title cannot be empty.
+[2026-07-27 19:12:12] WARNING Skipping malformed JSON record 7020: Article title cannot be empty.
+[2026-07-27 19:12:12] WARNING Skipping malformed JSON record 7751: Article title cannot be empty.
+[2026-07-27 19:12:13] WARNING Skipping malformed JSON record 71764: Article title cannot be empty.
+[2026-07-27 19:12:14] WARNING Skipping malformed JSON record 83886: Article title cannot be empty.
+[2026-07-27 19:12:14] INFO    Loaded 99981 valid articles
+[2026-07-27 19:12:14] INFO    Architecture initialization complete

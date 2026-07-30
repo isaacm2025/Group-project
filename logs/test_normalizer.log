@@ -1,0 +1,10 @@
+[2026-07-27 19:25:14] INFO    Application starting
+[2026-07-27 19:25:14] INFO    Loading articles from: data/articles.csv
+[2026-07-27 19:25:15] WARNING Skipping malformed CSV record 4736: Article title cannot be empty.
+[2026-07-27 19:25:15] WARNING Skipping malformed CSV record 7021: Article title cannot be empty.
+[2026-07-27 19:25:15] WARNING Skipping malformed CSV record 7752: Article title cannot be empty.
+[2026-07-27 19:25:26] WARNING Skipping malformed CSV record 71765: Article title cannot be empty.
+[2026-07-27 19:25:26] WARNING Skipping malformed CSV record 83887: Article title cannot be empty.
+[2026-07-27 19:25:27] INFO    Loaded 632 stop words
+[2026-07-27 19:25:27] INFO    Loaded 99981 valid articles
+[2026-07-27 19:25:27] INFO    Architecture initialization complete
