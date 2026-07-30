@@ -1,5 +1,6 @@
 package edu.upenn.cit5940.processor;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import edu.upenn.cit5940.common.dto.Article;
@@ -52,5 +53,24 @@ public class NewsSearchService {
 
     public int getArticleCount() {
         return repository.getArticleCount();
+    }
+
+    public List<String> getArticleTitlesByDateRange(
+            LocalDate startDate,
+            LocalDate endDate) {
+
+        logger.info(
+                "Article date-range query: "
+                        + startDate
+                        + " to "
+                        + endDate);
+
+        return repository
+                .getArticlesByDateRange(
+                        startDate,
+                        endDate)
+                .stream()
+                .map(Article::getTitle)
+                .toList();
     }
 }

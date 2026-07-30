@@ -1,14 +1,16 @@
 package edu.upenn.cit5940.datamanagement;
 
-import edu.upenn.cit5940.common.dto.Article;
-import org.junit.jupiter.api.Test;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
+
+import edu.upenn.cit5940.common.dto.Article;
+
 
 class ArticleRepositoryTest {
 
@@ -117,5 +119,65 @@ class ArticleRepositoryTest {
                 repository.search(
                         List.of("the"))
                         .isEmpty());
+    }
+
+    @Test
+    void returnsArticlesInsideInclusiveDateRange() {
+
+        Article first = new Article(
+                "1",
+                LocalDate.of(2024, 1, 1),
+                "url1",
+                "First Article",
+                "Body",
+                "Source",
+                "Author");
+
+        Article second = new Article(
+                "2",
+                LocalDate.of(2024, 1, 15),
+                "url2",
+                "Second Article",
+                "Body",
+                "Source",
+                "Author");
+
+        Article third = new Article(
+                "3",
+                LocalDate.of(2024, 2, 1),
+                "url3",
+                "Third Article",
+                "Body",
+                "Source",
+                "Author");
+
+        ArticleRepository repository =
+                new ArticleRepository(
+                        List.of(first, second, third),
+                        Set.of());
+
+        List<Article> results =
+                repository.getArticlesByDateRange(
+                        LocalDate.of(2024, 1, 1),
+                        LocalDate.of(2024, 1, 31));
+
+        assertEquals(2, results.size());
+        assertEquals("1", results.get(0).getId());
+        assertEquals("2", results.get(1).getId());
+    }
+
+    @Test
+    void rejectsReversedDateRange() {
+
+        ArticleRepository repository =
+                new ArticleRepository(
+                        List.of(),
+                        Set.of());
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> repository.getArticlesByDateRange(
+                        LocalDate.of(2024, 2, 1),
+                        LocalDate.of(2024, 1, 1)));
     }
 }

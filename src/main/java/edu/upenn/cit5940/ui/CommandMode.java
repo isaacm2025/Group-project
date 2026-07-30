@@ -1,5 +1,7 @@
 package edu.upenn.cit5940.ui;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -98,6 +100,10 @@ public class CommandMode {
             
             case "article":
                 executeArticle(parts);
+                return false;
+
+            case "articles":
+                executeArticlesByDate(parts);
                 return false;
 
             default:
@@ -212,5 +218,68 @@ public class CommandMode {
                 "help                - Show available commands");
         System.out.println(
                 "menu                - Return to the main menu");
+        System.out.println(
+                "articles <start_date> <end_date> "
+                        + "- Browse articles by date");
+    }
+
+
+    private void executeArticlesByDate(
+            String[] parts) {
+
+        if (parts.length != 3) {
+            System.out.println(
+                    "Usage: articles "
+                            + "<start_date> <end_date>");
+            return;
+        }
+
+        LocalDate startDate;
+        LocalDate endDate;
+
+        try {
+            startDate = LocalDate.parse(parts[1]);
+            endDate = LocalDate.parse(parts[2]);
+
+        } catch (DateTimeParseException exception) {
+            System.out.println(
+                    "Error: Invalid date provided. "
+                            + "Please use the YYYY-MM-DD format "
+                            + "with valid values.");
+            return;
+        }
+
+        if (startDate.isAfter(endDate)) {
+            System.out.println(
+                    "Error: Invalid date range. "
+                            + "The start date cannot be "
+                            + "after the end date.");
+            return;
+        }
+
+        List<String> titles =
+                service.getArticleTitlesByDateRange(
+                        startDate,
+                        endDate);
+
+        if (titles.isEmpty()) {
+            System.out.println(
+                    "No articles found.");
+            return;
+        }
+
+        System.out.println(
+                "Articles from "
+                        + startDate
+                        + " to "
+                        + endDate
+                        + ":");
+
+        for (String title : titles) {
+            System.out.println(title);
+        }
+
+        System.out.println(
+                titles.size() + " article(s) found.");
     }
 }

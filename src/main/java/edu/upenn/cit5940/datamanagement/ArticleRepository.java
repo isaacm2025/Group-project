@@ -1,5 +1,6 @@
 package edu.upenn.cit5940.datamanagement;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -7,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 import edu.upenn.cit5940.common.dto.Article;
 
@@ -15,6 +17,7 @@ public class ArticleRepository {
     private final Map<String, Article> articlesById;
     private final Map<String, Set<String>> invertedIndex;
     private final Set<String> stopWords;
+    private final TreeMap<LocalDate, List<String>> articlesByDate;
 
     public ArticleRepository(
             List<Article> articles,
@@ -31,6 +34,7 @@ public class ArticleRepository {
                 stopWords == null
                         ? Set.of()
                         : new HashSet<>(stopWords);
+        this.articlesByDate = new TreeMap<>();
 
         buildIndexes(articles);
     }
@@ -45,6 +49,8 @@ public class ArticleRepository {
             articlesById.put(
                     article.getId(),
                     article);
+            
+            articlesByDate.computeIfAbsent(article.getDate(), ignored -> new ArrayList<>()).add(article.getId());
 
             indexArticle(article);
         }
@@ -166,5 +172,47 @@ public class ArticleRepository {
                                         second.getTitle()));
 
         return results;
+
     }
+
+
+    public List<Article> getArticlesByDateRange(
+            LocalDate startDate,
+            LocalDate endDate) {
+
+        if (startDate == null || endDate == null) {
+            throw new IllegalArgumentException(
+                    "Start date and end date cannot be null.");
+        }
+
+        if (startDate.isAfter(endDate)) {
+            throw new IllegalArgumentException(
+                    "Start date cannot be after end date.");
+        }
+
+        List<Article> results = new ArrayList<>();
+
+        Map<LocalDate, List<String>> range =
+                articlesByDate.subMap(
+                        startDate,
+                        true,
+                        endDate,
+                        true);
+
+        for (Map.Entry<LocalDate, List<String>> entry
+                : range.entrySet()) {
+
+            for (String articleId : entry.getValue()) {
+                Article article =
+                        articlesById.get(articleId);
+
+                if (article != null) {
+                    results.add(article);
+                }
+            }
+        }
+
+        return results;
+    }
+
 }
