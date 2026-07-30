@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 
+import edu.upenn.cit5940.common.dto.Article;
 import edu.upenn.cit5940.logging.AppLogger;
 import edu.upenn.cit5940.processor.NewsSearchService;
 
@@ -94,6 +95,10 @@ public class CommandMode {
                 System.out.println(
                         "Returning to the main menu.");
                 return true;
+            
+            case "article":
+                executeArticle(parts);
+                return false;
 
             default:
                 System.out.println(
@@ -138,6 +143,41 @@ public class CommandMode {
                 titles.size() + " article(s) found.");
     }
 
+    private void executeArticle(String[] parts) {
+
+        if (parts.length != 2) {
+            System.out.println(
+                    "Usage: article <id>");
+            return;
+        }
+
+        Article article =
+                service.getArticleById(parts[1]);
+
+        if (article == null) {
+            System.out.println(
+                    "No article found with ID: "
+                            + parts[1]);
+            return;
+        }
+
+        System.out.println("Article Details");
+        System.out.println(
+                "ID: " + article.getId());
+        System.out.println(
+                "Date: " + article.getDate());
+        System.out.println(
+                "Title: " + article.getTitle());
+        System.out.println(
+                "Source: " + article.getSource());
+        System.out.println(
+                "Authors: " + article.getAuthors());
+        System.out.println(
+                "URL: " + article.getUrl());
+        System.out.println(
+                "Body: " + article.getBody());
+    }
+
     private void displayStatistics() {
 
         System.out.println(
@@ -164,6 +204,8 @@ public class CommandMode {
         System.out.println("AVAILABLE COMMANDS");
         System.out.println(
                 "search <keyword(s)> - Search articles");
+        System.out.println(
+                "article <id>        - View article details");
         System.out.println(
                 "stats               - Show statistics");
         System.out.println(

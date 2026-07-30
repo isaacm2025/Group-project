@@ -17,3 +17,19 @@
 [2026-07-30 12:24:35] INFO    User command: search
 [2026-07-30 12:24:42] INFO    User command: menu
 [2026-07-30 12:24:44] INFO    Application exiting
+[2026-07-30 12:38:30] INFO    Application starting
+[2026-07-30 12:38:30] INFO    Loading articles from: data/articles.csv
+[2026-07-30 12:38:33] WARNING Skipping malformed CSV record 4736: Article title cannot be empty.
+[2026-07-30 12:38:34] WARNING Skipping malformed CSV record 7021: Article title cannot be empty.
+[2026-07-30 12:38:34] WARNING Skipping malformed CSV record 7752: Article title cannot be empty.
+[2026-07-30 12:38:37] WARNING Skipping malformed CSV record 71765: Article title cannot be empty.
+[2026-07-30 12:38:38] WARNING Skipping malformed CSV record 83887: Article title cannot be empty.
+[2026-07-30 12:38:39] INFO    Loaded 632 stop words
+[2026-07-30 12:39:13] INFO    Built repository with 99981 articles and 221913 indexed words
+[2026-07-30 12:39:13] INFO    Loaded 99981 valid articles
+[2026-07-30 12:39:13] INFO    Architecture initialization complete
+[2026-07-30 12:39:41] INFO    User command: article <real-id>
+[2026-07-30 12:39:53] INFO    User command: article nonexistent-id
+[2026-07-30 12:40:01] INFO    User command: article
+[2026-07-30 12:40:14] INFO    User command: menu
+[2026-07-30 12:40:39] INFO    Application exiting
