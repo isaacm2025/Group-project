@@ -10,6 +10,7 @@ public class ConsoleUI {
     private final NewsSearchService service;
     private final AppLogger logger;
     private final Scanner scanner;
+    private final CommandMode commandMode;
 
     public ConsoleUI(
             NewsSearchService service,
@@ -28,6 +29,10 @@ public class ConsoleUI {
         this.service = service;
         this.logger = logger;
         this.scanner = new Scanner(System.in);
+        this.commandMode = new CommandMode(
+                service,
+                logger,
+                scanner);
     }
 
     public void start() {
@@ -45,8 +50,7 @@ public class ConsoleUI {
                                 "Interactive Mode is under construction.");
 
                 case "2" ->
-                        System.out.println(
-                                "Command Mode is under construction.");
+                        commandMode.start();
 
                 case "3" ->
                         displayHelp();
