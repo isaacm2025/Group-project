@@ -1,16 +1,11 @@
 package edu.upenn.cit5940.datamanagement;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.time.YearMonth;
+import java.util.*;
 
 import edu.upenn.cit5940.common.dto.Article;
+import edu.upenn.cit5940.common.dto.TopicCount;
 
 public class ArticleRepository {
 
@@ -19,6 +14,7 @@ public class ArticleRepository {
     private final Set<String> stopWords;
     private final TreeMap<LocalDate, List<String>> articlesByDate;
     private final TitleTrie titleTrie;
+    private final TreeMap<YearMonth, Map<String, Integer>> monthlyWordCounts;
 
     public ArticleRepository(
             List<Article> articles,
@@ -37,6 +33,7 @@ public class ArticleRepository {
                         : new HashSet<>(stopWords);
         this.articlesByDate = new TreeMap<>();
         this.titleTrie = new TitleTrie();
+        this.monthlyWordCounts = new TreeMap<>();
 
         buildIndexes(articles);
     }
@@ -92,6 +89,36 @@ public class ArticleRepository {
                             ignored -> new HashSet<>())
                     .add(article.getId());
         }
+        countTokensByMonth(article, tokens);
+    }
+
+    private void countTokensByMonth(Article article, List<String> tokens) {
+        LocalDate date = article.getDate();
+
+        if (date == null) {
+            return;
+        }
+
+        YearMonth period = YearMonth.from(date);
+
+        Map<String,Integer> counts = monthlyWordCounts.computeIfAbsent(period, ignored -> new HashMap<>());
+
+        for (String token : tokens) {
+            counts.merge(token, 1, Integer::sum);
+        }
+    }
+
+    public Map<String, Integer> getWordCountsForPeriod(YearMonth period) {
+
+        Map<String, Integer> counts = monthlyWordCounts.get(period);
+
+        return counts == null ? Map.of() : Collections.unmodifiableMap(counts);
+    }
+
+    public NavigableMap<YearMonth, Map<String, Integer>> getWordCountsInRange(
+            YearMonth start, YearMonth end) {
+
+        return monthlyWordCounts.subMap(start, true, end, true);
     }
 
     public Article getArticleById(String id) {
@@ -237,6 +264,53 @@ public class ArticleRepository {
         for (String word : titleWords) {
             titleTrie.insert(word);
         }
+    }
+
+    public List<TopicCount> getTopTopics(YearMonth period, int limit) {
+
+        Map<String, Integer> counts = getWordCountsForPeriod(period);
+
+        if (counts.isEmpty() || limit <= 0) {
+            return List.of();
+        }
+
+        CustomHeap<TopicCount> heap = new CustomHeap<>(limit);
+
+        for (Map.Entry<String, Integer> entry : counts.entrySet()) {
+
+            TopicCount candidate =
+                    new TopicCount(entry.getKey(), entry.getValue());
+
+            if (!heap.isFull()) {
+                heap.add(candidate);
+
+            } else if (candidate.compareTo(heap.peek()) > 0) {
+                heap.replaceRoot(candidate);
+            }
+        }
+
+        return heap.toDescendingList();
+    }
+
+    public Map<YearMonth, Integer> getTrendCounts(
+            String word, YearMonth start, YearMonth end) {
+
+        Map<YearMonth, Integer> trend = new LinkedHashMap<>();
+
+        for (YearMonth period = start;
+             !period.isAfter(end);
+             period = period.plusMonths(1)) {
+
+            Map<String, Integer> counts = monthlyWordCounts.get(period);
+
+            int count = counts == null
+                    ? 0
+                    : counts.getOrDefault(word, 0);
+
+            trend.put(period, count);
+        }
+
+        return trend;
     }
 
 }

@@ -3,13 +3,12 @@ package edu.upenn.cit5940.processor;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import edu.upenn.cit5940.common.dto.Article;
 import edu.upenn.cit5940.common.dto.TopicCount;
 import edu.upenn.cit5940.datamanagement.ArticleRepository;
+import edu.upenn.cit5940.datamanagement.TextNormalizer;
 import edu.upenn.cit5940.logging.AppLogger;
 
 public class NewsSearchService {
@@ -28,6 +27,8 @@ public class NewsSearchService {
     private static final String INVALID_RANGE_MESSAGE =
             "Error: Invalid date range. The start value cannot be after "
                     + "the end value.";
+
+    private static final int TOP_TOPICS_LIMIT = 10;
 
     public NewsSearchService(
             ArticleRepository repository,
@@ -112,18 +113,44 @@ public class NewsSearchService {
     }
 
     public List<TopicCount> getTopTopics(String period) throws InvalidInputException {
-        parsePeriod(period);
-        return List.of();
+        YearMonth yearMonth = parsePeriod(period);
+
+        List<TopicCount> topics =
+                repository.getTopTopics(yearMonth, TOP_TOPICS_LIMIT);
+
+        logger.info("Top topics for " + yearMonth
+                + " returned " + topics.size() + " entries");
+
+        return topics;
     }
 
     public Map<String, Integer> getTrends(String topic, String start, String end) throws InvalidInputException {
-        YearMonth startPerird  =  parsePeriod(start);
-        YearMonth endPerird = parsePeriod(end);
+        YearMonth startPeriod  =  parsePeriod(start);
+        YearMonth endPeriod = parsePeriod(end);
 
-        if (startPerird.isAfter(endPerird)) {
-            throw new InvalidInputException(INVALID_DATE_MESSAGE);
+        if (startPeriod.isAfter(endPeriod)) {
+            throw new InvalidInputException(INVALID_RANGE_MESSAGE);
         }
-        return Map.of();
+
+        List<String> terms = TextNormalizer.tokenize(topic, Set.of());
+
+        if (terms.isEmpty()) {
+            return Map.of();
+        }
+
+        Map<YearMonth, Integer> counts =
+                repository.getTrendCounts(terms.get(0), startPeriod, endPeriod);
+
+        Map<String, Integer> result = new LinkedHashMap<>();
+
+        for (Map.Entry<YearMonth, Integer> entry : counts.entrySet()) {
+            result.put(entry.getKey().toString(), entry.getValue());
+        }
+
+        logger.info("Trend query for \"" + topic + "\" from "
+                + startPeriod + " to " + endPeriod);
+
+        return result;
     }
 
     private LocalDate parseDate(String value) throws InvalidInputException {
