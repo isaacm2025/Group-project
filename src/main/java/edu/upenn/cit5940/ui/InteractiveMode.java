@@ -3,6 +3,7 @@ package edu.upenn.cit5940.ui;
 import edu.upenn.cit5940.common.dto.Article;
 import edu.upenn.cit5940.common.dto.TopicCount;
 import edu.upenn.cit5940.logging.AppLogger;
+import edu.upenn.cit5940.processor.InvalidInputException;
 import edu.upenn.cit5940.processor.NewsSearchService;
 
 import java.util.List;
@@ -201,7 +202,7 @@ public class InteractiveMode {
 
                 for (TopicCount topic : topics) {
                     System.out.println(
-                            topic.word() + ": " + topic.count()
+                            topic.getWord() + ": " + topic.getCount()
                     );
                 }
             }

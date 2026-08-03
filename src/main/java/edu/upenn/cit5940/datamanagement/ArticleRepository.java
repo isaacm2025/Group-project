@@ -53,9 +53,13 @@ public class ArticleRepository {
                     article);
 
             indexTitleWords(article);
-            
-            articlesByDate.computeIfAbsent(article.getDate(), ignored -> new ArrayList<>()).add(article.getId());
 
+            LocalDate date = article.getDate();
+
+            if (date != null) {
+                articlesByDate.computeIfAbsent(article.getDate(), ignored -> new ArrayList<>()).add(article.getId());
+
+            }
             indexArticle(article);
         }
     }
@@ -124,30 +128,20 @@ public class ArticleRepository {
     }
 
     public List<Article> search(
-            List<String> keywords) {
+            String query) {
 
-        if (keywords == null
-                || keywords.isEmpty()) {
+        List<String> terms = TextNormalizer.tokenize(query, stopWords);
+
+        if (terms.isEmpty()) {
             return List.of();
         }
 
         Set<String> matchingIds = null;
 
-        for (String keyword : keywords) {
-            String normalized =
-                    TextNormalizer.normalizeTerm(keyword);
+        for (String term : terms) {
 
-            if (normalized.isBlank()) {
-                return List.of();
-            }
+            Set<String> ids = invertedIndex.get(term);
 
-            Set<String> ids =
-                    invertedIndex.get(normalized);
-
-            /*
-             * The search uses AND logic.
-             * If one keyword is absent, there are no matches.
-             */
             if (ids == null || ids.isEmpty()) {
                 return List.of();
             }

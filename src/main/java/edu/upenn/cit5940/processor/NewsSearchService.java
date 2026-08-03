@@ -1,9 +1,14 @@
 package edu.upenn.cit5940.processor;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import edu.upenn.cit5940.common.dto.Article;
+import edu.upenn.cit5940.common.dto.TopicCount;
 import edu.upenn.cit5940.datamanagement.ArticleRepository;
 import edu.upenn.cit5940.logging.AppLogger;
 
@@ -11,6 +16,18 @@ public class NewsSearchService {
 
     private final ArticleRepository repository;
     private final AppLogger logger;
+
+    private static final String INVALID_DATE_MESSAGE =
+            "Error: Invalid date provided. Please use the YYYY-MM-DD format "
+                    + "with valid values.";
+
+    private static final String INVALID_PERIOD_MESSAGE =
+            "Error: Invalid period provided. Please use the YYYY-MM format "
+                    + "with valid values.";
+
+    private static final String INVALID_RANGE_MESSAGE =
+            "Error: Invalid date range. The start value cannot be after "
+                    + "the end value.";
 
     public NewsSearchService(
             ArticleRepository repository,
@@ -31,20 +48,21 @@ public class NewsSearchService {
     }
 
     public List<String> searchTitles(
-            List<String> keywords) {
+            String query) {
 
-        if (keywords == null || keywords.isEmpty()) {
+        if (query == null || query.isEmpty()) {
             return List.of();
         }
 
-        logger.info(
-                "Search query: "
-                        + String.join(" ", keywords));
-
-        return repository.search(keywords)
+        List<String> titles = repository.search(query)
                 .stream()
                 .map(Article::getTitle)
                 .toList();
+
+        logger.info(
+                "Search query \"" + query + "\" returned " + titles.size() + " articles.");
+
+        return titles;
     }
 
     public Article getArticleById(String id) {
@@ -55,9 +73,14 @@ public class NewsSearchService {
         return repository.getArticleCount();
     }
 
-    public List<String> getArticleTitlesByDateRange(
-            LocalDate startDate,
-            LocalDate endDate) {
+    public List<String> getArticleTitlesByDateRange(String start, String end) throws InvalidInputException {
+
+        LocalDate startDate = parseDate(start);
+        LocalDate endDate = parseDate(end);
+
+        if (startDate.isAfter(endDate)) {
+            throw new InvalidInputException(INVALID_RANGE_MESSAGE);
+        }
 
         logger.info(
                 "Article date-range query: "
@@ -86,5 +109,36 @@ public class NewsSearchService {
         return repository.autocomplete(
                 prefix,
                 10);
+    }
+
+    public List<TopicCount> getTopTopics(String period) throws InvalidInputException {
+        parsePeriod(period);
+        return List.of();
+    }
+
+    public Map<String, Integer> getTrends(String topic, String start, String end) throws InvalidInputException {
+        YearMonth startPerird  =  parsePeriod(start);
+        YearMonth endPerird = parsePeriod(end);
+
+        if (startPerird.isAfter(endPerird)) {
+            throw new InvalidInputException(INVALID_DATE_MESSAGE);
+        }
+        return Map.of();
+    }
+
+    private LocalDate parseDate(String value) throws InvalidInputException {
+        try {
+            return LocalDate.parse(value.trim());
+        } catch (DateTimeParseException | NullPointerException exception) {
+            throw new InvalidInputException(INVALID_DATE_MESSAGE);
+        }
+    }
+
+    private YearMonth parsePeriod(String value) throws InvalidInputException {
+        try {
+            return YearMonth.parse(value.trim());
+        } catch (DateTimeParseException | NullPointerException exception) {
+            throw new InvalidInputException(INVALID_PERIOD_MESSAGE);
+        }
     }
 }

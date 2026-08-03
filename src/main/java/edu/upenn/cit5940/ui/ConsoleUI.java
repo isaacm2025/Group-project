@@ -11,6 +11,7 @@ public class ConsoleUI {
     private final AppLogger logger;
     private final Scanner scanner;
     private final CommandMode commandMode;
+    private final InteractiveMode interactiveMode;
 
     public ConsoleUI(
             NewsSearchService service,
@@ -33,6 +34,11 @@ public class ConsoleUI {
                 service,
                 logger,
                 scanner);
+        this.interactiveMode = new InteractiveMode(
+                service,
+                logger,
+                scanner
+        );
     }
 
     public void start() {
@@ -40,14 +46,19 @@ public class ConsoleUI {
         boolean running = true;
 
         while (running) {
+
             displayMainMenu();
+
+            if (!scanner.hasNext()) {
+                running = false;
+                break;
+            }
 
             String input = scanner.nextLine().trim();
 
             switch (input) {
                 case "1" ->
-                        System.out.println(
-                                "Interactive Mode is under construction.");
+                        interactiveMode.start();
 
                 case "2" ->
                         commandMode.start();
@@ -112,7 +123,9 @@ public class ConsoleUI {
         System.out.println(
                 "Press ENTER to return to the main menu.");
 
-        scanner.nextLine();
+        if (scanner.hasNext()) {
+            scanner.nextLine();
+        }
     }
 
     private void handleInvalidInput(String input) {
