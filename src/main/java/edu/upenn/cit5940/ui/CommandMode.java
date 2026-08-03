@@ -2,13 +2,12 @@ package edu.upenn.cit5940.ui;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Scanner;
+import java.util.*;
 
 import edu.upenn.cit5940.common.dto.Article;
+import edu.upenn.cit5940.common.dto.TopicCount;
 import edu.upenn.cit5940.logging.AppLogger;
+import edu.upenn.cit5940.processor.InvalidInputException;
 import edu.upenn.cit5940.processor.NewsSearchService;
 
 public class CommandMode {
@@ -110,6 +109,14 @@ public class CommandMode {
                 executeAutocomplete(parts);
                 return false;
 
+            case "topics":
+                executeTopics(parts);
+                return false;
+
+            case "trends":
+                executeTrends(parts);
+                return false;
+
             default:
                 System.out.println(
                         "Unknown command. Type 'help' "
@@ -126,15 +133,10 @@ public class CommandMode {
             return;
         }
 
-        List<String> keywords =
-                Arrays.asList(
-                        Arrays.copyOfRange(
-                                parts,
-                                1,
-                                parts.length));
+        String query = String.join(" ", Arrays.copyOfRange(parts, 1, parts.length));
 
         List<String> titles =
-                service.searchTitles(keywords);
+                service.searchTitles(query);
 
         if (titles.isEmpty()) {
             System.out.println(
@@ -148,9 +150,6 @@ public class CommandMode {
         for (String title : titles) {
             System.out.println(title);
         }
-
-        System.out.println(
-                titles.size() + " article(s) found.");
     }
 
     private void executeArticle(String[] parts) {
@@ -241,54 +240,26 @@ public class CommandMode {
             return;
         }
 
-        LocalDate startDate;
-        LocalDate endDate;
-
         try {
-            startDate = LocalDate.parse(parts[1]);
-            endDate = LocalDate.parse(parts[2]);
+            List<String> titles = service.getArticleTitlesByDateRange(parts[1], parts[2]);
 
-        } catch (DateTimeParseException exception) {
-            System.out.println(
-                    "Error: Invalid date provided. "
-                            + "Please use the YYYY-MM-DD format "
-                            + "with valid values.");
-            return;
+            if (titles.isEmpty()) {
+                System.out.println("No articles found.");
+                return;
+            }
+
+            System.out.println("Articles from " + parts[1] + " to " + parts[2] + ": ");
+
+            for (String title : titles) {
+                System.out.println(title);
+            }
+
+        } catch (InvalidInputException exception) {
+            System.out.println(exception.getMessage());
+            logger.warning("Invalid date range: " + parts[1] + " to " + parts[2]);
         }
-
-        if (startDate.isAfter(endDate)) {
-            System.out.println(
-                    "Error: Invalid date range. "
-                            + "The start date cannot be "
-                            + "after the end date.");
-            return;
-        }
-
-        List<String> titles =
-                service.getArticleTitlesByDateRange(
-                        startDate,
-                        endDate);
-
-        if (titles.isEmpty()) {
-            System.out.println(
-                    "No articles found.");
-            return;
-        }
-
-        System.out.println(
-                "Articles from "
-                        + startDate
-                        + " to "
-                        + endDate
-                        + ":");
-
-        for (String title : titles) {
-            System.out.println(title);
-        }
-
-        System.out.println(
-                titles.size() + " article(s) found.");
     }
+
     private void executeAutocomplete(
             String[] parts) {
 
@@ -312,6 +283,57 @@ public class CommandMode {
 
         for (String suggestion : suggestions) {
             System.out.println(suggestion);
+        }
+    }
+
+    private void executeTopics(String[] parts) {
+
+        if (parts.length != 2) {
+            System.out.println("Usage: topics <YYYY-MM>");
+            return;
+        }
+
+        try {
+            List<TopicCount> topics = service.getTopTopics(parts[1]);
+
+            if (topics.isEmpty()) {
+                System.out.println("No topics found for " + parts[1] + ".");
+                return;
+            }
+
+            System.out.println("Top topics for " + parts[1] + ":");
+
+            for (TopicCount topic : topics) {
+                System.out.println(topic.getWord() + ": " + topic.getCount());
+            }
+
+        } catch (InvalidInputException exception) {
+            System.out.println(exception.getMessage());
+            logger.warning("Invalid period: " + parts[1]);
+        }
+    }
+
+    private void executeTrends(String[] parts) {
+
+        if (parts.length != 4) {
+            System.out.println("Usage: trends <topic> <start_period> <end_period>");
+            return;
+        }
+
+        try {
+            Map<String, Integer> trends =
+                    service.getTrends(parts[1], parts[2], parts[3]);
+
+            System.out.println("Trends for " + parts[1]
+                    + " from " + parts[2] + " to " + parts[3] + ":");
+
+            for (Map.Entry<String, Integer> entry : trends.entrySet()) {
+                System.out.println(entry.getKey() + ": " + entry.getValue());
+            }
+
+        } catch (InvalidInputException exception) {
+            System.out.println(exception.getMessage());
+            logger.warning("Invalid trend request: " + String.join(" ", parts));
         }
     }
 }
