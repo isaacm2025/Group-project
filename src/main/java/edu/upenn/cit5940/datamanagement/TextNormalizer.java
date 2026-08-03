@@ -114,4 +114,36 @@ public final class TextNormalizer {
                 .replaceAll("[^\\p{L}\\p{N}]+", "")
                 .trim();
     }
+
+    /**
+     * Normalizes user search terms without removing
+     * stop words or one-character terms.
+     *
+     * Those terms will simply have no inverted-index
+     * entry, causing a strict AND search to return
+     * no results.
+     */
+    public static List<String> tokenizeQuery(
+            String query) {
+
+        if (query == null || query.isBlank()) {
+            return List.of();
+        }
+
+        String normalized = query
+                .toLowerCase(Locale.ROOT)
+                .replaceAll(
+                        "[^\\p{L}\\p{N}]+",
+                        " ")
+                .trim();
+
+        if (normalized.isEmpty()) {
+            return List.of();
+        }
+
+        return Arrays.stream(
+                        normalized.split("\\s+"))
+                .filter(token -> !token.isBlank())
+                .toList();
+    }
 }

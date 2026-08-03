@@ -49,7 +49,7 @@ public class ConsoleUI {
 
             displayMainMenu();
 
-            if (!scanner.hasNext()) {
+            if (!scanner.hasNextLine()) {
                 running = false;
                 break;
             }
@@ -113,20 +113,38 @@ public class ConsoleUI {
                 "HELP & DOCUMENTATION");
         System.out.println(
                 "==================================================");
-        System.out.println(
-                "INTERACTIVE MODE: Guided interface.");
-        System.out.println(
-                "COMMAND MODE: Enter commands directly.");
-        System.out.println(
-                "AVAILABLE SERVICES include search articles "
-                        + "and autocomplete.");
-        System.out.println(
-                "Press ENTER to return to the main menu.");
 
-        if (scanner.hasNext()) {
-            scanner.nextLine();
+        System.out.println("INTERACTIVE MODE:");
+        System.out.println(
+                "Guided step-by-step interface.");
+
+        System.out.println("COMMAND MODE:");
+        System.out.println(
+                "Enter commands directly.");
+
+        System.out.println("AVAILABLE SERVICES:");
+        System.out.println("1. Search Articles");
+        System.out.println("2. Autocomplete");
+        System.out.println("3. Top Topics");
+        System.out.println("4. Topic Trends");
+        System.out.println("5. Browse Articles");
+        System.out.println("6. View Article");
+        System.out.println("7. Statistics");
+
+        System.out.println("DATE FORMATS:");
+        System.out.println(
+                "Period: YYYY-MM");
+        System.out.println(
+                "Date: YYYY-MM-DD");
+
+        System.out.println(
+                "Press ENTER to return "
+                        + "to the main menu.");
+
+        if (scanner.hasNextLine()) {
+                scanner.nextLine();
         }
-    }
+   }
 
     private void handleInvalidInput(String input) {
 

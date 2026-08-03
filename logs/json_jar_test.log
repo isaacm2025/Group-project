@@ -1,0 +1,12 @@
+[2026-08-03 16:35:05] INFO    Application starting
+[2026-08-03 16:35:05] INFO    Loading articles from: data/articles.json
+[2026-08-03 16:35:06] WARNING Skipping malformed JSON record 4735: Article title cannot be empty.
+[2026-08-03 16:35:06] WARNING Skipping malformed JSON record 7020: Article title cannot be empty.
+[2026-08-03 16:35:06] WARNING Skipping malformed JSON record 7751: Article title cannot be empty.
+[2026-08-03 16:35:08] WARNING Skipping malformed JSON record 71764: Article title cannot be empty.
+[2026-08-03 16:35:08] WARNING Skipping malformed JSON record 83886: Article title cannot be empty.
+[2026-08-03 16:35:08] INFO    Loaded 632 stop words
+[2026-08-03 16:35:39] INFO    Built repository with 99981 articles and 221913 indexed words
+[2026-08-03 16:35:39] INFO    Loaded 99981 valid articles
+[2026-08-03 16:35:39] INFO    Architecture initialization complete
+[2026-08-03 16:35:49] INFO    Application exiting

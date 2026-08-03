@@ -1,8 +1,10 @@
 package edu.upenn.cit5940.ui;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Scanner;
 
 import edu.upenn.cit5940.common.dto.Article;
 import edu.upenn.cit5940.common.dto.TopicCount;
@@ -211,22 +213,42 @@ public class CommandMode {
     private void displayHelp() {
 
         System.out.println("AVAILABLE COMMANDS");
+
         System.out.println(
-                "search <keyword(s)> - Search articles");
-        System.out.println(
-                "article <id>        - View article details");
-        System.out.println(
-                "stats               - Show statistics");
-        System.out.println(
-                "help                - Show available commands");
-        System.out.println(
-                "menu                - Return to the main menu");
-        System.out.println(
-                "articles <start_date> <end_date> "
-                        + "- Browse articles by date");
+                "search <keyword(s)> "
+                        + "- Search articles");
+
         System.out.println(
                 "autocomplete <prefix> "
                         + "- Get title-word suggestions");
+
+        System.out.println(
+                "topics <YYYY-MM> "
+                        + "- View top topics for a month");
+
+        System.out.println(
+                "trends <topic> <start> <end> "
+                        + "- View monthly topic trends");
+
+        System.out.println(
+                "articles <start_date> <end_date> "
+                        + "- Browse articles by date");
+
+        System.out.println(
+                "article <id> "
+                        + "- View article details");
+
+        System.out.println(
+                "stats "
+                        + "- Show statistics");
+
+        System.out.println(
+                "help "
+                        + "- Show available commands");
+
+        System.out.println(
+                "menu "
+                        + "- Return to the main menu");
     }
 
 

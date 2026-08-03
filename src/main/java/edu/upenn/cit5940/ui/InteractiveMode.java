@@ -1,14 +1,14 @@
 package edu.upenn.cit5940.ui;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+
 import edu.upenn.cit5940.common.dto.Article;
 import edu.upenn.cit5940.common.dto.TopicCount;
 import edu.upenn.cit5940.logging.AppLogger;
 import edu.upenn.cit5940.processor.InvalidInputException;
 import edu.upenn.cit5940.processor.NewsSearchService;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
 
 
 /**
@@ -146,17 +146,26 @@ public class InteractiveMode {
     }
 
     private void doSearch() {
-        String query = prompt("Enter keyword(s): ");
+
+        String query =
+                prompt("Enter search keyword(s): ");
 
         if (query == null || query.isEmpty()) {
-            System.out.println("Enter keyword(s): ");
+            System.out.println(
+                    "Please enter search keyword(s).");
             pause();
             return;
         }
 
-        logger.info("Interactive search query: " + query);
+        logger.info(
+                "Interactive search query: "
+                        + query);
 
-        printTitles(service.searchTitles(query));
+        System.out.println("Search results:");
+
+        printTitles(
+                service.searchTitles(query));
+
         pause();
     }
 
@@ -214,34 +223,56 @@ public class InteractiveMode {
     }
 
     private void doTrends() {
-        String topic = prompt("Enter a topic: ");
-        if (topic == null || topic.trim().isEmpty()) {
-            return;
-        }
 
-        String start =  prompt("Enter start period (YYYY-MM): ");
-        if (start == null || start.isEmpty()) {
-            return;
-        }
+        String topic =
+                prompt("Enter topic: ");
 
-        String end =  prompt("Enter end period (YYYY-MM): ");
-        if (end == null || end.isEmpty()) {
-            return;
-        }
+        String start =
+                prompt(
+                        "Enter start period "
+                                + "(YYYY-MM): ");
+
+        String end =
+                prompt(
+                        "Enter end period "
+                                + "(YYYY-MM): ");
 
         try {
-            Map<String, Integer> trends = service.getTrends(topic, start, end);
+            Map<String, Integer> trends =
+                    service.getTrends(
+                            topic,
+                            start,
+                            end);
 
-            System.out.println("Trends for " + topic + "from " + start + "to " + end + ":" );
+            if (trends.isEmpty()) {
+                System.out.println(
+                        "No trend data found.");
 
-            for (Map.Entry<String, Integer> entry : trends.entrySet()) {
-                System.out.println(entry.getKey() + ": " + entry.getValue());
+            } else {
+                System.out.println(
+                        "Trends for "
+                                + topic
+                                + " from "
+                                + start
+                                + " to "
+                                + end
+                                + ":");
+
+                for (Map.Entry<String, Integer> entry
+                        : trends.entrySet()) {
+
+                    System.out.println(
+                            entry.getKey()
+                                    + ": "
+                                    + entry.getValue());
+                }
             }
 
-        }catch (InvalidInputException exception) {
-            System.out.println(exception.getMessage());
-            logger.warning("Invalid trend request in Interactive mode." + topic + " " + start + " " + end);
+        } catch (InvalidInputException exception) {
+            System.out.println(
+                    exception.getMessage());
         }
+
         pause();
     }
 

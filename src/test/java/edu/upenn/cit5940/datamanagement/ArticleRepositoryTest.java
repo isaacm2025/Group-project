@@ -1,7 +1,9 @@
 package edu.upenn.cit5940.datamanagement;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -10,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 import edu.upenn.cit5940.common.dto.Article;
+import edu.upenn.cit5940.common.dto.TopicCount;
 
 
 class ArticleRepositoryTest {
@@ -68,11 +71,7 @@ class ArticleRepositoryTest {
                         List.of(first, second),
                         Set.of());
 
-        List<Article> results =
-                repository.search(
-                        List.of(
-                                "artificial",
-                                "intelligence"));
+        List<Article> results = repository.search("artificial intelligence");
 
         assertEquals(1, results.size());
         assertEquals("1", results.get(0).getId());
@@ -92,11 +91,7 @@ class ArticleRepositoryTest {
                         List.of(article),
                         Set.of());
 
-        List<Article> results =
-                repository.search(
-                        List.of(
-                                "artificial",
-                                "nonexistent"));
+         List<Article> results = repository.search("artificial nonexistent");
 
         assertTrue(results.isEmpty());
     }
@@ -115,10 +110,7 @@ class ArticleRepositoryTest {
                         List.of(article),
                         Set.of("the"));
 
-        assertTrue(
-                repository.search(
-                        List.of("the"))
-                        .isEmpty());
+        assertTrue(repository.search("the").isEmpty());
     }
 
     @Test
@@ -180,4 +172,196 @@ class ArticleRepositoryTest {
                         LocalDate.of(2024, 2, 1),
                         LocalDate.of(2024, 1, 1)));
     }
+
+    @Test
+    void returnsTopTopicsForSelectedMonth() {
+
+        Article first = new Article(
+                "1",
+                LocalDate.of(2024, 1, 5),
+                "url1",
+                "AI chips",
+                "AI future",
+                "Source",
+                "Author");
+
+        Article second = new Article(
+                "2",
+                LocalDate.of(2024, 1, 10),
+                "url2",
+                "AI robotics",
+                "chips chips",
+                "Source",
+                "Author");
+
+        Article outsideMonth = new Article(
+                "3",
+                LocalDate.of(2024, 2, 1),
+                "url3",
+                "AI",
+                "AI AI AI",
+                "Source",
+                "Author");
+
+        ArticleRepository repository =
+                new ArticleRepository(
+                        List.of(
+                                first,
+                                second,
+                                outsideMonth),
+                        Set.of("future"));
+
+        List<TopicCount> results =
+                repository.getTopTopics(
+                        YearMonth.of(2024, 1),
+                        2);
+
+        assertEquals(2, results.size());
+
+        assertEquals(
+                "ai",
+                results.get(0).getWord());
+
+        assertEquals(
+                3,
+                results.get(0).getCount());
+
+        assertEquals(
+                "chips",
+                results.get(1).getWord());
+
+        assertEquals(
+                3,
+                results.get(1).getCount());
+        }
+
+
+   @Test
+   void limitsTopTopicsToRequestedMaximum() {
+
+        Article article = new Article(
+                "1",
+                LocalDate.of(2024, 1, 1),
+                "url",
+                "alpha bravo charlie delta echo foxtrot",
+                "golf hotel india juliet kilo lima",
+                "Source",
+                "Author");
+
+        ArticleRepository repository =
+                new ArticleRepository(
+                        List.of(article),
+                        Set.of());
+
+        List<TopicCount> results =
+                repository.getTopTopics(
+                        YearMonth.of(2024, 1),
+                        10);
+
+        assertEquals(10, results.size());
+    }
+
+   @Test
+   void returnsInclusiveMonthlyTopicTrend() {
+
+        Article january = new Article(
+                "1",
+                LocalDate.of(2024, 1, 1),
+                "url1",
+                "AI AI",
+                "",
+                "Source",
+                "Author");
+
+        Article march = new Article(
+                "2",
+                LocalDate.of(2024, 3, 1),
+                "url2",
+                "AI",
+                "",
+                "Source",
+                "Author");
+
+        ArticleRepository repository =
+                new ArticleRepository(
+                        List.of(january, march),
+                        Set.of());
+
+        Map<YearMonth, Integer> trend =
+                repository.getTopicTrend(
+                        "ai",
+                        YearMonth.of(2024, 1),
+                        YearMonth.of(2024, 3));
+
+        assertEquals(3, trend.size());
+
+        assertEquals(
+                2,
+                trend.get(YearMonth.of(2024, 1)));
+
+        assertEquals(
+                0,
+                trend.get(YearMonth.of(2024, 2)));
+
+        assertEquals(
+                1,
+                trend.get(YearMonth.of(2024, 3)));
+   }
+
+   @Test
+   void rejectsReversedTrendPeriod() {
+
+        ArticleRepository repository =
+                new ArticleRepository(
+                        List.of(),
+                        Set.of());
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> repository.getTopicTrend(
+                        "ai",
+                        YearMonth.of(2024, 3),
+                        YearMonth.of(2024, 1)));
+   }
+
+   @Test
+   void stopWordInQueryProducesNoAndMatches() {
+
+        Article article =
+                createArticle(
+                        "1",
+                        "Artificial Intelligence",
+                        "New research");
+
+        ArticleRepository repository =
+                new ArticleRepository(
+                        List.of(article),
+                        Set.of("the"));
+
+        assertTrue(
+                repository.search(
+                        "artificial the")
+                        .isEmpty());
+   }
+
+   @Test
+   void oneCharacterTermInQueryProducesNoMatches() {
+
+        Article article =
+                createArticle(
+                        "1",
+                        "Artificial Intelligence",
+                        "New research");
+
+        ArticleRepository repository =
+                new ArticleRepository(
+                        List.of(article),
+                        Set.of());
+
+        assertTrue(
+                repository.search(
+                        "artificial a")
+                        .isEmpty());
+   }
+
 }

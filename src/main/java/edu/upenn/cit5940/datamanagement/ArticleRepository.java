@@ -1,16 +1,21 @@
 package edu.upenn.cit5940.datamanagement;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.TreeMap;
 
 import edu.upenn.cit5940.common.dto.Article;
+import edu.upenn.cit5940.common.dto.TopicCount;
 
 public class ArticleRepository {
 
@@ -19,10 +24,10 @@ public class ArticleRepository {
     private final Set<String> stopWords;
     private final TreeMap<LocalDate, List<String>> articlesByDate;
     private final TitleTrie titleTrie;
+    private final TreeMap<YearMonth, Map<String, Integer>> monthlyWordCounts;
+    
 
-    public ArticleRepository(
-            List<Article> articles,
-            Set<String> stopWords) {
+    public ArticleRepository(List<Article> articles, Set<String> stopWords) {
 
         if (articles == null) {
             throw new IllegalArgumentException(
@@ -37,6 +42,7 @@ public class ArticleRepository {
                         : new HashSet<>(stopWords);
         this.articlesByDate = new TreeMap<>();
         this.titleTrie = new TitleTrie();
+        this.monthlyWordCounts = new TreeMap<>();
 
         buildIndexes(articles);
     }
@@ -60,7 +66,18 @@ public class ArticleRepository {
                 articlesByDate.computeIfAbsent(article.getDate(), ignored -> new ArrayList<>()).add(article.getId());
 
             }
-            indexArticle(article);
+            String searchableText =
+                article.getTitle()
+                        + " "
+                        + article.getBody();
+
+            List<String> tokens =
+                    TextNormalizer.tokenize(
+                            searchableText,
+                            stopWords);
+
+            indexArticle(article, tokens);
+            indexMonthlyTopics(article, tokens);
         }
     }
 
@@ -73,17 +90,9 @@ public class ArticleRepository {
                 maximumSuggestions);
     }
 
-    private void indexArticle(Article article) {
-
-        String searchableText =
-                article.getTitle()
-                        + " "
-                        + article.getBody();
-
-        List<String> tokens =
-                TextNormalizer.tokenize(
-                        searchableText,
-                        stopWords);
+    private void indexArticle(
+            Article article,
+            List<String> tokens) {
 
         for (String token : tokens) {
             invertedIndex
@@ -91,6 +100,32 @@ public class ArticleRepository {
                             token,
                             ignored -> new HashSet<>())
                     .add(article.getId());
+        }
+    }
+
+    private void indexMonthlyTopics(
+            Article article,
+            List<String> tokens) {
+
+        LocalDate date = article.getDate();
+
+        if (date == null) {
+            return;
+        }
+
+        YearMonth period =
+                YearMonth.from(date);
+
+        Map<String, Integer> counts =
+                monthlyWordCounts.computeIfAbsent(
+                        period,
+                        ignored -> new HashMap<>());
+
+        for (String token : tokens) {
+            counts.merge(
+                    token,
+                    1,
+                    Integer::sum);
         }
     }
 
@@ -130,7 +165,7 @@ public class ArticleRepository {
     public List<Article> search(
             String query) {
 
-        List<String> terms = TextNormalizer.tokenize(query, stopWords);
+        List<String> terms = TextNormalizer.tokenizeQuery(query);
 
         if (terms.isEmpty()) {
             return List.of();
@@ -239,4 +274,127 @@ public class ArticleRepository {
         }
     }
 
+    public List<TopicCount> getTopTopics(
+            YearMonth period,
+            int maximumResults) {
+
+        if (period == null || maximumResults <= 0) {
+            return List.of();
+        }
+
+        Map<String, Integer> counts =
+                monthlyWordCounts.get(period);
+
+        if (counts == null || counts.isEmpty()) {
+            return List.of();
+        }
+
+        /*
+        * The root is the worst item currently inside
+        * the top-results heap:
+        *
+        * 1. Lower frequency is worse.
+        * 2. For equal frequencies, a later
+        *    alphabetical word is worse.
+        */
+        Comparator<TopicCount> worstFirst =
+                (first, second) -> {
+
+                    int countComparison =
+                            Integer.compare(
+                                    first.getCount(),
+                                    second.getCount());
+
+                    if (countComparison != 0) {
+                        return countComparison;
+                    }
+
+                    return second.getWord()
+                            .compareTo(first.getWord());
+                };
+
+        PriorityQueue<TopicCount> heap =
+                new PriorityQueue<>(worstFirst);
+
+        for (Map.Entry<String, Integer> entry
+                : counts.entrySet()) {
+
+            TopicCount candidate =
+                    new TopicCount(
+                            entry.getKey(),
+                            entry.getValue());
+
+            if (heap.size() < maximumResults) {
+                heap.offer(candidate);
+                continue;
+            }
+
+            if (worstFirst.compare(
+                    candidate,
+                    heap.peek()) > 0) {
+
+                heap.poll();
+                heap.offer(candidate);
+            }
+        }
+
+        List<TopicCount> results =
+                new ArrayList<>(heap);
+
+        results.sort(
+                Comparator
+                        .comparingInt(
+                                TopicCount::getCount)
+                        .reversed()
+                        .thenComparing(
+                                TopicCount::getWord));
+
+        return results;
+    }
+
+    public Map<YearMonth, Integer> getTopicTrend(
+            String topic,
+            YearMonth startPeriod,
+            YearMonth endPeriod) {
+
+        if (topic == null
+                || startPeriod == null
+                || endPeriod == null) {
+
+            throw new IllegalArgumentException(
+                    "Topic and periods cannot be null.");
+        }
+
+        if (startPeriod.isAfter(endPeriod)) {
+            throw new IllegalArgumentException(
+                    "Start period cannot be after end period.");
+        }
+
+        String normalizedTopic =
+                TextNormalizer.normalizeTerm(topic);
+
+        Map<YearMonth, Integer> results =
+                new LinkedHashMap<>();
+
+        YearMonth current = startPeriod;
+
+        while (!current.isAfter(endPeriod)) {
+
+            Map<String, Integer> counts =
+                    monthlyWordCounts.get(current);
+
+            int count =
+                    counts == null
+                            ? 0
+                            : counts.getOrDefault(
+                                    normalizedTopic,
+                                    0);
+
+            results.put(current, count);
+
+            current = current.plusMonths(1);
+        }
+
+        return results;
+    }
 }
