@@ -1,0 +1,46 @@
+[2026-08-03 16:06:56] INFO    Application starting
+[2026-08-03 16:06:56] INFO    Loading articles from: data/articles_small.csv
+[2026-08-03 16:06:56] INFO    Loaded 632 stop words
+[2026-08-03 16:06:56] INFO    Built repository with 100 articles and 6150 indexed words
+[2026-08-03 16:06:56] INFO    Loaded 100 valid articles
+[2026-08-03 16:06:56] INFO    Architecture initialization complete
+[2026-08-03 16:41:40] INFO    User command: stats
+[2026-08-03 16:41:44] INFO    User command: help
+[2026-08-03 16:42:03] INFO    User command: search technology
+[2026-08-03 16:42:03] INFO    Search query "technology" returned 20 articles.
+[2026-08-03 16:42:17] INFO    User command: autocomplete tech
+[2026-08-03 16:42:17] INFO    Autocomplete query: tech
+[2026-08-03 16:42:29] INFO    User command: articles 2023-01-01 2023-12-31
+[2026-08-03 16:42:29] INFO    Article date-range query: 2023-01-01 to 2023-12-31
+[2026-08-03 16:42:39] INFO    User command: articles 2024-13-45 2024-01-01
+[2026-08-03 16:42:39] WARNING Invalid date range: 2024-13-45 to 2024-01-01
+[2026-08-03 16:42:55] INFO    User command: topics 2023-05
+[2026-08-03 16:43:01] INFO    User command: menu
+[2026-08-03 16:43:19] INFO    Starting interactive mode.
+[2026-08-03 16:43:23] INFO    Interactive Mode choice: 1
+[2026-08-03 16:43:31] INFO    Interactive search query: technology
+[2026-08-03 16:43:31] INFO    Search query "technology" returned 20 articles.
+[2026-08-03 16:43:42] INFO    Interactive Mode choice: 5
+[2026-08-03 16:43:57] INFO    Article date-range query: 2023-01-01 to 2023-12-31
+[2026-08-03 16:44:03] INFO    Interactive Mode choice: 8
+[2026-08-03 16:44:03] INFO    Finished interactive mode.
+[2026-08-03 17:10:13] INFO    Application starting
+[2026-08-03 17:10:13] INFO    Loading articles from: data/articles_small.csv
+[2026-08-03 17:10:13] INFO    Loaded 632 stop words
+[2026-08-03 17:10:13] INFO    Built repository with 100 articles and 6150 indexed words
+[2026-08-03 17:10:13] INFO    Loaded 100 valid articles
+[2026-08-03 17:10:13] INFO    Architecture initialization complete
+[2026-08-03 17:33:15] INFO    Application starting
+[2026-08-03 17:33:15] INFO    Loading articles from: data/articles_small.csv
+[2026-08-03 17:33:15] INFO    Loaded 632 stop words
+[2026-08-03 17:33:15] INFO    Built repository with 100 articles and 6150 indexed words
+[2026-08-03 17:33:15] INFO    Loaded 100 valid articles
+[2026-08-03 17:33:15] INFO    Architecture initialization complete
+[2026-08-03 17:33:31] INFO    User command: topics 2023-05
+[2026-08-03 17:33:31] INFO    Top topics for 2023-05 returned 0 entries
+[2026-08-03 17:34:03] INFO    User command: menu
+[2026-08-03 17:34:05] INFO    Starting interactive mode.
+[2026-08-03 17:34:12] INFO    Interactive Mode choice: 5
+[2026-08-03 17:34:30] WARNING Invalid date range in Interactive mode:2023-01 to 2023-06
+[2026-08-03 17:35:12] INFO    Interactive Mode choice: 5
+[2026-08-03 17:35:25] INFO    Article date-range query: 2023-01-01 to 2023-06-30
