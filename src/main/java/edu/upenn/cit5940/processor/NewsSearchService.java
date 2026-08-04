@@ -6,6 +6,7 @@ import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import edu.upenn.cit5940.common.dto.Article;
 import edu.upenn.cit5940.common.dto.TopicCount;
@@ -137,13 +138,13 @@ public class NewsSearchService {
             String end)
             throws InvalidInputException {
 
-        String normalizedTopic =
-                TextNormalizer.normalizeTerm(topic);
+        List<String> topicTerms = TextNormalizer.tokenize(topic, Set.of());
 
-        if (normalizedTopic.isEmpty()) {
-            throw new InvalidInputException(
-                    INVALID_TOPIC_MESSAGE);
+        if (topicTerms.isEmpty()) {
+            throw new InvalidInputException(INVALID_TOPIC_MESSAGE);
         }
+
+        String normalizedTopic = topicTerms.get(0);
 
         YearMonth startPeriod =
                 parsePeriod(start);

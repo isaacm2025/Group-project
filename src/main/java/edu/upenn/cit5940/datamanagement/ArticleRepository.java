@@ -146,14 +146,15 @@ public class ArticleRepository {
         return invertedIndex.size();
     }
 
-    public Set<String> getArticleIdsForWord(
-            String word) {
+    public Set<String> getArticleIdsForWord(String word) {
 
-        String normalized =
-                TextNormalizer.normalizeTerm(word);
+        List<String> terms = TextNormalizer.tokenize(word, Set.of());
 
-        Set<String> ids =
-                invertedIndex.get(normalized);
+        if (terms.isEmpty()) {
+            return Set.of();
+        }
+
+        Set<String> ids = invertedIndex.get(terms.get(0));
 
         if (ids == null) {
             return Set.of();
@@ -370,9 +371,6 @@ public class ArticleRepository {
                     "Start period cannot be after end period.");
         }
 
-        String normalizedTopic =
-                TextNormalizer.normalizeTerm(topic);
-
         Map<YearMonth, Integer> results =
                 new LinkedHashMap<>();
 
@@ -387,7 +385,7 @@ public class ArticleRepository {
                     counts == null
                             ? 0
                             : counts.getOrDefault(
-                                    normalizedTopic,
+                                    topic,
                                     0);
 
             results.put(current, count);
