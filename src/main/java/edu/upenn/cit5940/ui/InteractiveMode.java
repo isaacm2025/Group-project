@@ -22,8 +22,9 @@ import edu.upenn.cit5940.processor.NewsSearchService;
 public class InteractiveMode {
 
     private static final String MENU_PROMPT = "Select a service (1-8): ";
-    private static final String EMPTY_INPUT_MESSAGE = "Please enter a choice.";
-    private static final String INVALID_INPUT_MESSAGE = "Please enter a valid number (1-8).";
+    private static final String EMPTY_INPUT_MESSAGE = "Empty Input. Please enter a choice.";
+    private static final String NON_NUMERIC_MESSAGE = "Please enter a valid number (1-8).";
+    private static final String INVALID_CHOICE_MESSAGE = "Invalid choice. Please enter 1-8.";
 
     private final NewsSearchService service;
     private final AppLogger logger;
@@ -102,7 +103,7 @@ public class InteractiveMode {
             try {
                 choice = Integer.parseInt(input);
             } catch (NumberFormatException e) {
-                System.out.println("Please enter a valid number (1-8).");
+                System.out.println(NON_NUMERIC_MESSAGE);
                 continue;
             }
 
@@ -140,7 +141,7 @@ public class InteractiveMode {
                 System.out.println("Returning to the main menu.");
                 return false;
             default:
-                System.out.println(INVALID_INPUT_MESSAGE);
+                System.out.println(INVALID_CHOICE_MESSAGE);
                 return true;
         }
     }

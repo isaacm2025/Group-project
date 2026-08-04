@@ -58,7 +58,7 @@ public class CommandMode {
 
             if (input.isEmpty()) {
                 System.out.println(
-                        "Please enter a command.");
+                        "Empty input. Please enter a command.");
                 continue;
             }
 
