@@ -40,3 +40,10 @@ build/
 
 data/articles.csv
 data/articles.json
+
+target/
+logs/
+*.log
+tech_news_search.log
+.DS_Store
+__MACOSX/
